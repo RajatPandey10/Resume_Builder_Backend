@@ -1,3 +1,9 @@
 spring:
   application:
     name: resumebuilderapi
+
+
+# mongodb configuration
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/resumebuilder

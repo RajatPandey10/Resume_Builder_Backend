@@ -7,3 +7,30 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/resumebuilder
+
+
+# Email configuration
+  mail:
+    host: smtp-relay.brevo.com
+    port: 587
+    username: ${Email_User_Name}
+    password: ${Email_Password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+      protocol: smtp
+
+app:
+  mail:
+    from: ${Email}
+  base:
+    url: http://localhost:8080
+
+# Application info
+
+

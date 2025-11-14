@@ -34,3 +34,10 @@ app:
 # Application info
 
 
+# cloudinary information
+cloudinary:
+  cloud:
+    name: ${CLOUDINARY_NAME}
+  credentials:
+    api-key: ${CLOUDINARY_API-KEY}
+    api-secret: ${CLOUDINARY_SECRET_KEY}

@@ -1,5 +1,6 @@
 package in.RajatPandey.resumebuilderapi.controller;
 
+import in.RajatPandey.resumebuilderapi.Documents.User;
 import in.RajatPandey.resumebuilderapi.dto.AuthResponse;
 import in.RajatPandey.resumebuilderapi.dto.LoginRequest;
 import in.RajatPandey.resumebuilderapi.dto.RegisterRequest;
@@ -10,11 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 import static in.RajatPandey.resumebuilderapi.utils.AppConstants.*;
 
@@ -52,9 +55,40 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
+    @PostMapping(LOGIN)
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request){
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/validate")
+    public String testAuthValidationToken(){
+        return "Token Validation is working";
+    }
+
+    @PostMapping(RESEND_VERIFICATION)
+    public ResponseEntity<?> resendVerification(@RequestBody Map<String,String> body){
+         String email = body.get("email");
+
+         if(Objects.isNull(email)){
+             return ResponseEntity.badRequest().body(Map.of("message","Email is required"));
+         }
+
+         authService.resendVerification(email);
+
+         return ResponseEntity.ok(Map.of("Success",true,"message","Verification email sent"));
+    }
+
+    @GetMapping(PROFILE)
+    public ResponseEntity<?> getProfile(Authentication authentication){
+        Object principalObject = authentication.getPrincipal();
+
+        AuthResponse currentProfile = authService.getProfile(principalObject);
+
+        return ResponseEntity.ok(currentProfile);
+
+
+
+
     }
 }

@@ -6,6 +6,7 @@ import in.RajatPandey.resumebuilderapi.dto.LoginRequest;
 import in.RajatPandey.resumebuilderapi.dto.RegisterRequest;
 import in.RajatPandey.resumebuilderapi.exceptions.ResourceExistsException;
 import in.RajatPandey.resumebuilderapi.repository.UserRepository;
+import in.RajatPandey.resumebuilderapi.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ import java.util.UUID;
 @Slf4j
 public class AuthService {
 
+    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
@@ -128,9 +131,30 @@ public class AuthService {
             throw new RuntimeException("Please verify your email before logging in.");
         }
 
-        String token = "jwtToken";
+        String token = jwtUtil.generateToken(existingUser.getId());
+
         AuthResponse response = toResponse(existingUser);
         response.setToken(token);
         return response;
+    }
+
+    public void resendVerification(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new RuntimeException("User not found"));
+
+        if(user.isEmailVerified()){
+            throw new RuntimeException("Email is already verified");
+        }
+
+        user.setVerificationToken(UUID.randomUUID().toString());;
+        user.setVerificationExpires(LocalDate.now().atStartOfDay().plusHours(24));
+        userRepository.save(user);
+
+        sendVerificationEmail(user);
+    }
+
+    public AuthResponse getProfile(Object principalObject) {
+        User existingUser = (User)principalObject;
+        return toResponse(existingUser);
     }
 }

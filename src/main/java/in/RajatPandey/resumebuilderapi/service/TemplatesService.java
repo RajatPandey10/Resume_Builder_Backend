@@ -1,0 +1,44 @@
+package in.RajatPandey.resumebuilderapi.service;
+
+import in.RajatPandey.resumebuilderapi.dto.AuthResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static in.RajatPandey.resumebuilderapi.utils.AppConstants.PREMIUM;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class TemplatesService {
+
+    private final AuthService authService;
+
+    public Map<String,Object> getTemplates(Object principal){
+        AuthResponse response = authService.getProfile(principal);
+        List<String> allTemplates = List.of("01","02","03");
+
+        List<String> availableTemplates;
+        Boolean isPremium = PREMIUM.equalsIgnoreCase(response.getSubscriptionPlan());
+
+        if(isPremium){
+            availableTemplates= List.of("01","02","03");
+        }else {
+            availableTemplates = List.of("01");
+        }
+        Map<String,Object> restrictions = new HashMap<>();
+
+        restrictions.put("availableTemplates",availableTemplates);
+
+        restrictions.put("allTemplates",List.of("01","02","03"));
+        restrictions.put("subscriptionPlan",response.getSubscriptionPlan());
+        restrictions.put("isPremium",isPremium);
+
+        return restrictions;
+    }
+}

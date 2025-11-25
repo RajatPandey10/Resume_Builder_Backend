@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.Objects;
 
+import static in.RajatPandey.resumebuilderapi.utils.AppConstants.TEMPLATE_CONTROLLER;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/templates")
+@RequestMapping(TEMPLATE_CONTROLLER)
 @Slf4j
 public class TemplatesController {
 
@@ -22,6 +24,7 @@ public class TemplatesController {
 
     @GetMapping
     public ResponseEntity<?> getTemplates(Authentication authentication){
+        log.info("Fetching templates for user: {}", authentication.getName());
 
         Map<String, Object> response = templatesService.getTemplates(authentication.getPrincipal());
 

@@ -20,6 +20,7 @@ public class TemplatesService {
     private final AuthService authService;
 
     public Map<String,Object> getTemplates(Object principal){
+        log.info("Fetching templates for user...");
         AuthResponse response = authService.getProfile(principal);
         List<String> allTemplates = List.of("01","02","03");
 
@@ -38,6 +39,8 @@ public class TemplatesService {
         restrictions.put("allTemplates",List.of("01","02","03"));
         restrictions.put("subscriptionPlan",response.getSubscriptionPlan());
         restrictions.put("isPremium",isPremium);
+
+        log.debug("Templates response prepared for user {}", response.getEmail());
 
         return restrictions;
     }

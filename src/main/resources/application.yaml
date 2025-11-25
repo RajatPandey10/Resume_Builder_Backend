@@ -43,3 +43,11 @@ cloudinary:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 604800000
+
+
+
+# Razorpay Configuration
+razorpay:
+  key:
+    id: ${RAZORPAY_ID}
+    secret: ${RAZORPAY_SECRET}

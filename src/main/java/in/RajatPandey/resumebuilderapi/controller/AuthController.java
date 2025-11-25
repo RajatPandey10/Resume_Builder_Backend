@@ -32,16 +32,17 @@ public class AuthController {
 
     @PostMapping(REGISTER)
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request){
-        log.info("Inside AuthController - register(): {}",request);
-        log.info("Response from service: {}",request);
+        log.info("Register request received for email: {}", request.getEmail());
         AuthResponse response = authService.register(request);
+        log.info("User registered successfully with id: {}", response.getId());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     }
 
     @GetMapping(VERIFY_EMAIL)
     public ResponseEntity<?> verifyEmail(@RequestParam String token){
-        log.info("Inside AuthController - verifyEmail(): {}",token);
+        log.info("Email verification requested");
         authService.verifyEmail(token);
 //        return ResponseEntity.status(HttpStatus.FOUND).location("/")
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message","Email Verified Successfully"));
@@ -57,7 +58,9 @@ public class AuthController {
 
     @PostMapping(LOGIN)
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request){
+        log.info("Login attempt for the email: {}",request.getEmail());
         AuthResponse response = authService.login(request);
+        log.info("Logging successful for userId: {}",response.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -68,7 +71,8 @@ public class AuthController {
 
     @PostMapping(RESEND_VERIFICATION)
     public ResponseEntity<?> resendVerification(@RequestBody Map<String,String> body){
-         String email = body.get("email");
+        log.info("Resend verification email request ");
+        String email = body.get("email");
 
          if(Objects.isNull(email)){
              return ResponseEntity.badRequest().body(Map.of("message","Email is required"));
@@ -81,14 +85,12 @@ public class AuthController {
 
     @GetMapping(PROFILE)
     public ResponseEntity<?> getProfile(Authentication authentication){
+        log.info("Fetching user profile");
         Object principalObject = authentication.getPrincipal();
 
         AuthResponse currentProfile = authService.getProfile(principalObject);
 
         return ResponseEntity.ok(currentProfile);
-
-
-
 
     }
 }

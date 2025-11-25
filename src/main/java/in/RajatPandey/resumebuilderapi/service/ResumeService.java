@@ -22,14 +22,18 @@ public class ResumeService {
     private final AuthService authService;
 
     public Resume createResume(CreateResumeRequest request, Object principalObject) {
+
        Resume newResume = new Resume();
        AuthResponse response = authService.getProfile(principalObject);
+        log.info("Creating new resume for userId: {}", response.getId());
        newResume.setUserId(response.getId());
        newResume.setTitle(request.getTitle());
 
 //       Setting default resume data
+        log.debug("Setting default fields for resume with title: {}", request.getTitle());
         setDefaultResumeData(newResume);
 
+        log.info("Resume created successfully with id: {}", newResume.getId());
         return resumeRepository.save(newResume);
 
     }
@@ -48,25 +52,44 @@ public class ResumeService {
 
     }
 
+
     public List<Resume> getUserResumes(Object principal) {
         AuthResponse response = authService.getProfile(principal);
+        log.info("Fetching resumes for userId: {}", response.getId());
 
-        return resumeRepository.findByUserIdOrderByUpdatedAtDesc(response.getId());
+        List<Resume> resumes = resumeRepository.findByUserIdOrderByUpdatedAtDesc(response.getId());
+
+        log.debug("Found {} resumes for userId {}", resumes.size(), response.getId());
+        return resumes;
     }
 
     public Resume getResumeById(String resumeId, Object principal) {
         AuthResponse response = authService.getProfile(principal);
-        Resume existingResume =  resumeRepository.findByUserIdAndId(response.getId(),resumeId)
-                .orElseThrow(()-> new RuntimeException("Resume not found"));
+        log.info("Fetching resume by id: {} for userId: {}", resumeId, response.getId());
+        Resume existingResume = resumeRepository
+                .findByUserIdAndId(response.getId(), resumeId)
+                .orElseThrow(() -> {
+                    log.error("Resume not found with id: {} for userId: {}", resumeId, response.getId());
+                    return new RuntimeException("Resume not found");
+                });
 
+        log.debug("Resume found: {}", existingResume.getId());
         return existingResume;
 
     }
 
     public Resume updataResume(String resumeId, Resume updatedData, Object principal) {
         AuthResponse response = authService.getProfile(principal);
-        Resume existingResume = resumeRepository.findByUserIdAndId(response.getId(),resumeId)
-                .orElseThrow(()-> new RuntimeException("Resume not found"));
+        log.info("Updating resume id: {} for userId: {}", resumeId, response.getId());
+
+        Resume existingResume = resumeRepository
+                .findByUserIdAndId(response.getId(), resumeId)
+                .orElseThrow(() -> {
+                    log.error("Cannot update. Resume not found: {} for userId: {}", resumeId, response.getId());
+                    return new RuntimeException("Resume not found");
+                });
+
+        log.debug("Applying update fields to resume id: {}", resumeId);
         existingResume.setTitle(updatedData.getTitle());
         existingResume.setThumbnailLink(updatedData.getThumbnailLink());
         existingResume.setTemplate(updatedData.getTemplate());
@@ -80,18 +103,25 @@ public class ResumeService {
         existingResume.setLanguages(updatedData.getLanguages());
         existingResume.setInterests(updatedData.getInterests());
 
-        resumeRepository.save(existingResume);
+        Resume updatedResume = resumeRepository.save(existingResume);
 
-        return existingResume;
+        log.info("Resume updated successfully: {}", resumeId);
+        return updatedResume;
     }
 
     public void deleteResume(String resumeId, Object principal) {
 
         AuthResponse response = authService.getProfile(principal);
+        log.info("Deleting resume id: {} for userId: {}", resumeId, response.getId());
 
-        Resume existingResume = resumeRepository.findByUserIdAndId(response.getId(),resumeId)
-                .orElseThrow(()-> new RuntimeException("Resume not found"));
+        Resume existingResume = resumeRepository
+                .findByUserIdAndId(response.getId(), resumeId)
+                .orElseThrow(() -> {
+                    log.error("Cannot delete. Resume not found: {} for userId: {}", resumeId, response.getId());
+                    return new RuntimeException("Resume not found");
+                });
 
         resumeRepository.delete(existingResume);
+        log.info("Resume deleted successfully: {}", resumeId);
     }
 }

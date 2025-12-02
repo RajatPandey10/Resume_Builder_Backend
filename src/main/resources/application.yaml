@@ -30,7 +30,7 @@ app:
   mail:
     from: ${Email}
   base:
-    url: http://localhost:8080
+    url: ${APP_BASE_URL}
 
 
 

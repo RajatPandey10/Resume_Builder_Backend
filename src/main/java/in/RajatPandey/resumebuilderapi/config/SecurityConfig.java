@@ -47,17 +47,22 @@ public class SecurityConfig {
         return http.build();
 
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        // <CHANGE> Allow multiple origins including v0 preview
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "https://*.v0.dev",
+                "https://*.vercel.app",
+                "https://resumebuilderapi.netlify.app"
+        ));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));;
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",configuration);
         return source;
-
     }
 }

@@ -49,7 +49,8 @@ public class AuthService {
     private void sendVerificationEmail(User newUser){
         log.info("Inside AuthService - sendVerificationEmail(): {}",newUser);
         try{
-            String link = appBaseUrl+"/api/auth/verify-email?token="+newUser.getVerificationToken();
+            String link = appBaseUrl + "/api/auth/verify-email?token=" + newUser.getVerificationToken();
+
             String html = "<div style=\"font-family: 'Arial', sans-serif; background-color: #f7f7f7; padding: 20px;\">\n" +
                     "    <div style=\"max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);\">\n" +
                     "        <h2 style=\"color: #333333; text-align: center; font-size: 28px;\">Welcome to Our Platform, {{name}} 😊</h2>\n" +
@@ -103,21 +104,28 @@ public class AuthService {
     }
 
 
-    public void verifyEmail(String token){
-        log.info("Inside auth service VerifyEmail(): {}",token);
-        User user = userRepository.findByVerificationToken(token)
-                .orElseThrow(()-> new RuntimeException(("Invalid or expired verification token")));
+    public boolean verifyEmail(String token) {
+        log.info("Inside AuthService - verifyEmail(): {}", token);
 
-        if(user.getVerificationExpires() != null &&  user.getVerificationExpires().isBefore(LocalDateTime.now())){
-            throw new RuntimeException("Verification token has expired. Please request new one.");
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid or expired verification token"));
+
+        // Check expiration
+        if (user.getVerificationExpires() != null &&
+                user.getVerificationExpires().isBefore(LocalDateTime.now())) {
+
+            throw new RuntimeException("Verification token has expired. Please request a new one.");
         }
 
+        // Update user
         user.setEmailVerified(true);
-        user.setVerificationToken(null);;
+        user.setVerificationToken(null);
         user.setVerificationExpires(null);
         userRepository.save(user);
 
+        return true;
     }
+
 
 
     public AuthResponse login(LoginRequest request){

@@ -6,6 +6,7 @@ import in.RajatPandey.resumebuilderapi.dto.LoginRequest;
 import in.RajatPandey.resumebuilderapi.dto.RegisterRequest;
 import in.RajatPandey.resumebuilderapi.service.AuthService;
 import in.RajatPandey.resumebuilderapi.service.FileUploadService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +42,21 @@ public class AuthController {
     }
 
     @GetMapping(VERIFY_EMAIL)
-    public ResponseEntity<?> verifyEmail(@RequestParam String token){
-        log.info("Email verification requested");
-        authService.verifyEmail(token);
-//        return ResponseEntity.status(HttpStatus.FOUND).location("/")
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message","Email Verified Successfully"));
+    public void verifyEmail(@RequestParam String token, HttpServletResponse response) throws IOException {
+        try {
+            boolean verified = authService.verifyEmail(token);
 
+            if (verified) {
+                // Redirect to Netlify login page
+                response.sendRedirect("https://resumebuilderapi.netlify.app/login?verified=true");
+            }
+        } catch (Exception e) {
+            // Redirect failed verification
+            response.sendRedirect("https://resumebuilderapi.netlify.app/verify-email-failed");
+        }
     }
+
+
 
     @PostMapping(UPLOAD_PROFILE)
     public ResponseEntity<?> uploadImage(@RequestPart("image") MultipartFile file) throws IOException {

@@ -6,7 +6,8 @@ spring:
 # mongodb configuration
   data:
     mongodb:
-      uri: mongodb://localhost:27017/resumebuilder
+      uri: ${MONGODB_URI}
+      auto-index-creation: true
 
 
 # Email configuration
@@ -30,6 +31,9 @@ app:
     from: ${Email}
   base:
     url: http://localhost:8080
+
+
+
 
 # cloudinary information
 cloudinary:
